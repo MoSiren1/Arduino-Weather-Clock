@@ -6,16 +6,13 @@
 // Ethernet and NTP client setup
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; // MAC address. If you have several Make sure you use the proper MAC.
 
-// Initialize LCD
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 EthernetClient client;
 
-// Menu system
 enum MenuState { WEATHER, TIME };
 MenuState currentMenu = WEATHER;
 
-// Weather and time data placeholders
 String currentTemp = "Loading...";
 String weatherConditions = "Loading...";
 String windSpeed = "Loading...";
@@ -23,11 +20,9 @@ String windDirection = "Loading...";
 String currentTime = "Loading...";
 String currentDate = "Loading...";
 
-// Timing variables
 unsigned long lastWeatherUpdate = 0;
 const unsigned long weatherUpdateInterval = 60000;  // Fetch weather every 60 seconds
 
-// Function prototypes
 void fetchWeatherAndTimeData();
 void displayWeather();
 void scrollText(const String& text, int row);
@@ -41,10 +36,7 @@ void setup() {
 
   lcd.print("Initializing...");
   delay(750);
-
-  //Serial.println("Ethernet initialized."); // Debugging
   
-  // Fetch initial weather and time data
   fetchWeatherAndTimeData();
 }
 
@@ -55,14 +47,12 @@ void loop() {
 
 // Handle the menu switching and updating of data accordingly
 void handleMenu() {
-  // Simulate a menu button press with a basic state change (replace this with real button logic)
   static unsigned long lastButtonPress = 0;
   if (millis() - lastButtonPress > 4500) {
     currentMenu = (currentMenu == WEATHER) ? TIME : WEATHER;
     lastButtonPress = millis();
   }
 
-  // Display content based on the current menu
   switch (currentMenu) {
     case WEATHER:
       if (millis() - lastWeatherUpdate > weatherUpdateInterval) {
@@ -104,7 +94,6 @@ void fetchWeatherAndTimeData() {
     Serial.println("Raw response:"); //Debugging
     Serial.println(response);
 
-    // Parse each data field with refined methods
     int tempIndex = response.indexOf("\"temp\":");
     int conditionIndex = response.indexOf("\"condition\":");
     int windSpeedIndex = response.indexOf("\"wind_speed\":");
@@ -154,14 +143,11 @@ void fetchWeatherAndTimeData() {
 
 
 
-// Display weather data on the LCD
 void displayWeather() {
   lcd.clear();
 
-  // Prepare the display string
   String displayString = "Temp: " + currentTemp + "F " + weatherConditions;
 
-  // Scroll text if it's too long for the LCD display
   if (displayString.length() > 16) {
     scrollText(displayString, 0);
   } else {
@@ -169,47 +155,39 @@ void displayWeather() {
     lcd.print(displayString);
   }
 
-  // Prepare wind information
   String windInfo = "Wind:" + windDirection + " @ " + windSpeed;
   lcd.setCursor(0, 1);
   lcd.print(windInfo);
 }
 
-// Function to scroll text on the LCD
-int scrollDelay = 250;  // Delay between scrolls in milliseconds
-int endPause = 850;    // Pause duration at end of scroll in milliseconds
+int scrollDelay = 250;
+int endPause = 850;
 
-// Replace your existing scrollText function with this updated version
 void scrollText(const String& text, int row) {
   static int scrollPosition = 0;
   static unsigned long lastScrollTime = 0;
 
-  // If the text has reached the end, pause before resetting
   if (scrollPosition > text.length()) {
     delay(endPause);
-    scrollPosition = 0;  // Reset the scroll position
+    scrollPosition = 0;
   }
 
-  // Scroll text based on delay interval
   if (millis() - lastScrollTime >= scrollDelay) {
     String visibleText = text.substring(scrollPosition, scrollPosition + 16);  // Adjust for LCD width
     lcd.setCursor(0, row);
     lcd.print(visibleText);
 
     scrollPosition++;
-    lastScrollTime = millis();  // Update last scroll time
+    lastScrollTime = millis(); 
   }
 }
-// Display time on the LCD
 void displayTime() {
   lcd.clear();
 
-  // Display the current time on the first row
   lcd.setCursor(0, 0);
   lcd.print("Time: ");
   lcd.print(currentTime);
 
-  // Display the current date on the second row
   lcd.setCursor(0, 1);
   lcd.print(currentDate);
 }
